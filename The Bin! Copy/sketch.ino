@@ -1,5 +1,7 @@
 // Now turn this trash into treasure!
 
+const int buzzerPin = 21; // Pin for the buzzer
+
 void setup() {
   // Initialize serial communication at 115200 baud
   Serial1.begin(115200);
@@ -10,6 +12,9 @@ void setup() {
 
   // Joystick button pin setup
   pinMode(22, INPUT_PULLUP); // Set button pin as input with internal pull-up
+
+  // Buzzer pin setup
+  pinMode(buzzerPin, OUTPUT);
 }
 
 void loop() {
@@ -51,6 +56,12 @@ void loop() {
   Serial1.print("Joystick Button State: ");
   Serial1.println(joyButtonState == 0 ? "Pressed" : "Not Pressed");
 
+  // Control the buzzer with the joystick button
+  if (joyButtonState == 0) { // If the button is pressed
+    tone(buzzerPin, 1000); // Play a tone at 1000 Hz
+  } else {
+    noTone(buzzerPin); // Stop the tone
+  }
+
   delay(100); // Delay to avoid overwhelming the serial monitor
 }
-
