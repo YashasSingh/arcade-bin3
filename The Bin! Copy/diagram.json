@@ -19,6 +19,14 @@
       "left": -194.1,
       "rotate": 180,
       "attrs": {}
+    },
+    {
+      "type": "wokwi-analog-joystick",
+      "id": "joystick1",
+      "top": 207,
+      "left": 35.6,
+      "rotate": 180,
+      "attrs": {}
     }
   ],
   "connections": [
@@ -28,7 +36,11 @@
     [ "wokwi-ds1307-0:5V", "pico:VBUS", "red", [ "h48", "v-191.6", "h134.4", "v19.2" ] ],
     [ "wokwi-slide-potentiometer-0:VCC", "pico:VBUS", "red", [ "h-19.2", "v-48" ] ],
     [ "wokwi-slide-potentiometer-0:GND", "pico:GND.5", "black", [ "v0" ] ],
-    [ "wokwi-slide-potentiometer-0:SIG", "pico:GP28", "green", [ "h0" ] ]
+    [ "pico:GP26", "wokwi-slide-potentiometer-0:SIG", "green", [ "h42.26", "v-22.45" ] ],
+    [ "joystick1:VCC", "pico:VBUS", "red", [ "v0" ] ],
+    [ "joystick1:GND", "pico:GND.4", "black", [ "v-9.6", "h-76.8", "v-28.8" ] ],
+    [ "joystick1:SEL", "pico:GP16", "green", [ "v0" ] ],
+    [ "joystick1:VERT", "pico:GP17", "green", [ "v0" ] ]
   ],
   "dependencies": {}
 }
