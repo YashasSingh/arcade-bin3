@@ -37,10 +37,11 @@
     [ "wokwi-slide-potentiometer-0:VCC", "pico:VBUS", "red", [ "h-19.2", "v-48" ] ],
     [ "wokwi-slide-potentiometer-0:GND", "pico:GND.5", "black", [ "v0" ] ],
     [ "pico:GP26", "wokwi-slide-potentiometer-0:SIG", "green", [ "h42.26", "v-22.45" ] ],
-    [ "joystick1:VCC", "pico:VBUS", "red", [ "v0" ] ],
     [ "joystick1:GND", "pico:GND.4", "black", [ "v-9.6", "h-76.8", "v-28.8" ] ],
-    [ "joystick1:SEL", "pico:GP16", "green", [ "v0" ] ],
-    [ "joystick1:VERT", "pico:GP17", "green", [ "v0" ] ]
+    [ "joystick1:VCC", "pico:3V3", "red", [ "v0" ] ],
+    [ "joystick1:HORZ", "pico:GP27", "gold", [ "v0" ] ],
+    [ "joystick1:VERT", "pico:GP28", "violet", [ "v0" ] ],
+    [ "joystick1:SEL", "pico:GP22", "cyan", [ "v-9.6", "h48", "v-57.6" ] ]
   ],
   "dependencies": {}
 }
