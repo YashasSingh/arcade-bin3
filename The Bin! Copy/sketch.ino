@@ -23,6 +23,11 @@ int paddleY;
 int paddleY2;
 int ballX, ballY;
 int ballSpeedX = 1, ballSpeedY = 1;
+int paddleStep = 1; // Step size for paddle movement
+int bottom =220;
+// Scoreboard parameters
+int scoreLeft = 0;
+int scoreRight = 0;
 
 void setup() {
   // Initialize serial communication
@@ -41,20 +46,31 @@ void setup() {
   display.clearDisplay();
 
   // Initialize paddle and ball positions
-  paddleY = SCREEN_HEIGHT / 2 - paddleHeight / 2;
-  paddleY2 = SCREEN_HEIGHT / 2 - paddleHeight / 2;
+  paddleY = bottom / 2 - paddleHeight / 2;
+  paddleY2 = bottom / 2 - paddleHeight / 2;
   ballX = SCREEN_WIDTH / 2;
   ballY = SCREEN_HEIGHT / 2;
+
 }
 
 void loop() {
   // Read the analog value from the potentiometer
   int potValue = analogRead(potPin); // Read the ADC value
-  paddleY = map(potValue, 0, 4095, 0, 220); // Map to paddle position
+  paddleY = map(potValue, 0, 4095, 0, bottom); // Map to paddle position
 
   // Read the analog value from the joystick Y-axis
   int joyYValue = analogRead(joyYPin); // Read the ADC value for Y-axis
-  paddleY2 = map(joyYValue, 0, 4095, 0, 220); // Map to paddle position
+  Serial1.println(joyYValue);
+
+  // Move the second paddle up or down based on the joystick position
+  if (joyYValue > 1020) { // Move up
+    paddleY2 -= paddleStep;
+    if (paddleY2 < 0) paddleY2 = 0;
+  } 
+  if (joyYValue < 511) { // Move down
+    paddleY2 += paddleStep;
+    if (paddleY2 > bottom) paddleY2 = bottom;
+  }
 
   // Update ball position
   ballX += ballSpeedX;
@@ -73,18 +89,22 @@ void loop() {
   // Ball collision with right paddle
   if (ballX >= SCREEN_WIDTH - paddleWidth - 1 && ballY >= paddleY2 && ballY <= paddleY2 + paddleHeight) {
     ballSpeedX = -ballSpeedX;
+    Serial1.println("hit");
   }
 
   // Ball goes out of bounds (right side)
   if (ballX >= SCREEN_WIDTH - 1) {
+    scoreLeft++; // Increment left player's score
     ballX = SCREEN_WIDTH / 2;
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = 1;
     ballSpeedY = 1;
+    Serial1.println("out");
   }
 
   // Ball goes out of bounds (left side)
   if (ballX <= 0) {
+    scoreRight++; // Increment right player's score
     ballX = SCREEN_WIDTH / 2;
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = -1;
@@ -102,6 +122,16 @@ void loop() {
 
   // Draw ball
   display.fillRect(ballX, ballY, 2, 2, SSD1306_WHITE);
+
+  // Display the scores
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(30, 0);
+  display.print("P1: ");
+  display.print(scoreLeft);
+  display.setCursor(80, 0);
+  display.print("P2: ");
+  display.print(scoreRight);
 
   // Update display
   display.display();
