@@ -16,6 +16,9 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const int potPin = 26; // ADC0
 const int joyYPin = 28; // ADC2 (Y-axis)
 
+// Define the buzzer pin
+const int buzzerPin = 21; // Choose an appropriate pin for the buzzer
+
 // Paddle and ball parameters
 int paddleHeight = 10;
 int paddleWidth = 2;
@@ -37,6 +40,27 @@ float speedIncrement = 0.2;
 // Winning score
 const int winningScore = 5;
 
+// Function to play a tone on the buzzer
+void playTone(int frequency, int duration) {
+  tone(buzzerPin, frequency, duration);
+  delay(duration);
+  noTone(buzzerPin);
+}
+
+// Function to play the point sound
+void playPointSound() {
+  playTone(1000, 50);
+}
+
+// Function to play the victory fanfare
+void playVictoryFanfare() {
+  playTone(1000, 50);
+  playTone(2000, 50);
+  playTone(3000, 50);
+  playTone(4000, 100);
+  playTone(500, 150);
+}
+
 // Function to display victory message
 void displayVictoryMessage(const char* winner) {
   display.clearDisplay();
@@ -45,6 +69,7 @@ void displayVictoryMessage(const char* winner) {
   display.setCursor(10, 20);
   display.print(winner);
   display.display();
+  playVictoryFanfare();
   while (true) {
     // Halt the game
   }
@@ -129,6 +154,7 @@ void loop() {
   // Ball goes out of bounds (right side)
   if (ballX >= SCREEN_WIDTH - 1) {
     scoreLeft++; // Increment left player's score
+    playPointSound(); // Play point sound
     ballX = SCREEN_WIDTH / 2;
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = 1;
@@ -140,6 +166,7 @@ void loop() {
   // Ball goes out of bounds (left side)
   if (ballX <= 0) {
     scoreRight++; // Increment right player's score
+    playPointSound(); // Play point sound
     ballX = SCREEN_WIDTH / 2;
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = -1;
