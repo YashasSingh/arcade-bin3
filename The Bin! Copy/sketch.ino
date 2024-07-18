@@ -24,10 +24,15 @@ int paddleY2;
 int ballX, ballY;
 int ballSpeedX = 1, ballSpeedY = 1;
 int paddleStep = 1; // Step size for paddle movement
-int bottom =220;
+int bottom = 220;
+int  multiplier = 1;
+
 // Scoreboard parameters
 int scoreLeft = 0;
 int scoreRight = 0;
+
+// Speed increment
+float speedIncrement = 0.2;
 
 void setup() {
   // Initialize serial communication
@@ -46,11 +51,10 @@ void setup() {
   display.clearDisplay();
 
   // Initialize paddle and ball positions
-  paddleY = bottom / 2 - paddleHeight / 2;
-  paddleY2 = bottom / 2 - paddleHeight / 2;
+  paddleY = SCREEN_HEIGHT / 2 - paddleHeight / 2;
+  paddleY2 = SCREEN_HEIGHT / 2 - paddleHeight / 2;
   ballX = SCREEN_WIDTH / 2;
   ballY = SCREEN_HEIGHT / 2;
-
 }
 
 void loop() {
@@ -73,8 +77,8 @@ void loop() {
   }
 
   // Update ball position
-  ballX += ballSpeedX;
-  ballY += ballSpeedY;
+  ballX += ballSpeedX * multiplier;
+  ballY += ballSpeedY *  multiplier;
 
   // Ball collision with top and bottom
   if (ballY <= 0 || ballY >= SCREEN_HEIGHT - 1) {
@@ -84,12 +88,18 @@ void loop() {
   // Ball collision with left paddle
   if (ballX <= paddleWidth && ballY >= paddleY && ballY <= paddleY + paddleHeight) {
     ballSpeedX = -ballSpeedX;
+    ballSpeedX += (ballSpeedX > 0 ? speedIncrement : -speedIncrement);
+    ballSpeedY += (ballSpeedY > 0 ? speedIncrement : -speedIncrement);
+    multiplier += 1;
   }
 
   // Ball collision with right paddle
   if (ballX >= SCREEN_WIDTH - paddleWidth - 1 && ballY >= paddleY2 && ballY <= paddleY2 + paddleHeight) {
     ballSpeedX = -ballSpeedX;
+    ballSpeedX += (ballSpeedX > 0 ? speedIncrement : -speedIncrement);
+    ballSpeedY += (ballSpeedY > 0 ? speedIncrement : -speedIncrement);
     Serial1.println("hit");
+    multiplier += 1;
   }
 
   // Ball goes out of bounds (right side)
@@ -100,6 +110,7 @@ void loop() {
     ballSpeedX = 1;
     ballSpeedY = 1;
     Serial1.println("out");
+    multiplier = 1;
   }
 
   // Ball goes out of bounds (left side)
@@ -109,6 +120,7 @@ void loop() {
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = -1;
     ballSpeedY = -1;
+    multiplier =1;
   }
 
   // Clear display

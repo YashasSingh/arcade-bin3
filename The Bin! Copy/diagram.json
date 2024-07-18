@@ -15,9 +15,8 @@
     {
       "type": "wokwi-analog-joystick",
       "id": "joystick1",
-      "top": 207,
-      "left": 35.6,
-      "rotate": 180,
+      "top": 220.2,
+      "left": 34.2,
       "attrs": {}
     },
     {
