@@ -2,202 +2,202 @@
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
 
-// OLED display dimensions
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
+// Display dimensions for OLED
+#define OLED_WIDTH 128
+#define OLED_HEIGHT 64
 
-// OLED reset pin
-#define OLED_RESET -1
+// Reset pin for OLED display
+#define OLED_RESET_PIN -1
 
-// Create an instance of the SSD1306 display
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// Initialize SSD1306 OLED display
+Adafruit_SSD1306 oledDisplay(OLED_WIDTH, OLED_HEIGHT, &Wire, OLED_RESET_PIN);
 
-// Define the potentiometer and joystick pins
-const int potPin = 26; // ADC0
-const int joyYPin = 28; // ADC2 (Y-axis)
+// Pins for potentiometer and joystick
+const int potentiometerPin = 26; // ADC0
+const int joystickYPin = 28; // ADC2 (Y-axis)
 
-// Define the buzzer pin
-const int buzzerPin = 21; // Choose an appropriate pin for the buzzer
+// Pin for buzzer
+const int buzzerPin = 21; // Choose a suitable pin for the buzzer
 
-// Paddle and ball parameters
+// Dimensions and positions for paddle and ball
 int paddleHeight = 10;
 int paddleWidth = 2;
-int paddleY;
-int paddleY2;
-int ballX, ballY;
-int ballSpeedX = 1, ballSpeedY = 1;
-int paddleStep = 1; // Step size for paddle movement
-int bottom = 220;
-int multiplier = 1;
+int paddleLeftY;
+int paddleRightY;
+int ballPosX, ballPosY;
+int ballVelocityX = 1, ballVelocityY = 1;
+int paddleMoveStep = 1;
+int screenBottom = 220;
+int speedMultiplier = 1;
 
-// Scoreboard parameters
-int scoreLeft = 0;
-int scoreRight = 0;
+// Scores for players
+int playerLeftScore = 0;
+int playerRightScore = 0;
 
-// Speed increment
-float speedIncrement = 0.2;
+// Increment for speed
+float speedIncrease = 0.2;
 
 // Winning score
-const int winningScore = 5;
+const int maxScore = 5;
 
-// Function to play a tone on the buzzer
-void playTone(int frequency, int duration) {
+// Function to generate a tone on the buzzer
+void generateTone(int frequency, int duration) {
   tone(buzzerPin, frequency, duration);
   delay(duration);
   noTone(buzzerPin);
 }
 
-// Function to play the point sound
+// Function to play point sound
 void playPointSound() {
-  playTone(1000, 50);
+  generateTone(1000, 50);
 }
 
-// Function to play the victory fanfare
-void playVictoryFanfare() {
-  playTone(1000, 50);
-  playTone(2000, 50);
-  playTone(3000, 50);
-  playTone(4000, 100);
-  playTone(500, 150);
+// Function to play victory sound
+void playVictorySound() {
+  generateTone(1000, 50);
+  generateTone(2000, 50);
+  generateTone(3000, 50);
+  generateTone(4000, 100);
+  generateTone(500, 150);
 }
 
 // Function to display victory message
-void displayVictoryMessage(const char* winner) {
-  display.clearDisplay();
-  display.setTextSize(2);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(10, 20);
-  display.print(winner);
-  display.display();
-  playVictoryFanfare();
+void showVictoryMessage(const char* winner) {
+  oledDisplay.clearDisplay();
+  oledDisplay.setTextSize(2);
+  oledDisplay.setTextColor(SSD1306_WHITE);
+  oledDisplay.setCursor(10, 20);
+  oledDisplay.print(winner);
+  oledDisplay.display();
+  playVictorySound();
   while (true) {
-    // Halt the game
+    // Stop the game
   }
 }
 
 void setup() {
   // Initialize serial communication
   Serial1.begin(115200);
-  Serial1.println("Pong Game Setup");
+  Serial1.println("Pong Game Initialization");
 
   // Initialize the OLED display
-  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial1.println(F("SSD1306 allocation failed"));
+  if (!oledDisplay.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial1.println(F("Failed to initialize SSD1306"));
     for (;;);
   }
-  display.display();
+  oledDisplay.display();
   delay(2000); // Pause for 2 seconds
 
-  // Clear the buffer
-  display.clearDisplay();
+  // Clear the display buffer
+  oledDisplay.clearDisplay();
 
-  // Initialize paddle and ball positions
-  paddleY = SCREEN_HEIGHT / 2 - paddleHeight / 2;
-  paddleY2 = SCREEN_HEIGHT / 2 - paddleHeight / 2;
-  ballX = SCREEN_WIDTH / 2;
-  ballY = SCREEN_HEIGHT / 2;
+  // Set initial positions for paddles and ball
+  paddleLeftY = OLED_HEIGHT / 2 - paddleHeight / 2;
+  paddleRightY = OLED_HEIGHT / 2 - paddleHeight / 2;
+  ballPosX = OLED_WIDTH / 2;
+  ballPosY = OLED_HEIGHT / 2;
 }
 
 void loop() {
-  // Check for victory
-  if (scoreLeft >= winningScore) {
-    displayVictoryMessage("P1 Wins!");
+  // Check for a winner
+  if (playerLeftScore >= maxScore) {
+    showVictoryMessage("P1 Wins!");
   }
-  if (scoreRight >= winningScore) {
-    displayVictoryMessage("P2 Wins!");
+  if (playerRightScore >= maxScore) {
+    showVictoryMessage("P2 Wins!");
   }
 
-  // Read the analog value from the potentiometer
-  int potValue = analogRead(potPin); // Read the ADC value
-  paddleY = map(potValue, 0, 4095, 0, bottom); // Map to paddle position
+  // Read potentiometer value
+  int potValue = analogRead(potentiometerPin); // ADC read
+  paddleLeftY = map(potValue, 0, 4095, 0, screenBottom); // Map to paddle position
 
-  // Read the analog value from the joystick Y-axis
-  int joyYValue = analogRead(joyYPin); // Read the ADC value for Y-axis
-  Serial1.println(joyYValue);
+  // Read joystick Y-axis value
+  int joystickValueY = analogRead(joystickYPin); // ADC read for Y-axis
+  Serial1.println(joystickValueY);
 
-  // Move the second paddle up or down based on the joystick position
-  if (joyYValue > 1020) { // Move up
-    paddleY2 -= paddleStep;
-    if (paddleY2 < 0) paddleY2 = 0;
+  // Move right paddle based on joystick position
+  if (joystickValueY > 1020) { // Move up
+    paddleRightY -= paddleMoveStep;
+    if (paddleRightY < 0) paddleRightY = 0;
   }
-  if (joyYValue < 511) { // Move down
-    paddleY2 += paddleStep;
-    if (paddleY2 > bottom) paddleY2 = bottom;
+  if (joystickValueY < 511) { // Move down
+    paddleRightY += paddleMoveStep;
+    if (paddleRightY > screenBottom) paddleRightY = screenBottom;
   }
 
   // Update ball position
-  ballX += ballSpeedX * multiplier;
-  ballY += ballSpeedY * multiplier;
+  ballPosX += ballVelocityX * speedMultiplier;
+  ballPosY += ballVelocityY * speedMultiplier;
 
   // Ball collision with top and bottom
-  if (ballY <= 0 || ballY >= SCREEN_HEIGHT - 1) {
-    ballSpeedY = -ballSpeedY;
+  if (ballPosY <= 0 || ballPosY >= OLED_HEIGHT - 1) {
+    ballVelocityY = -ballVelocityY;
   }
 
   // Ball collision with left paddle
-  if (ballX <= paddleWidth && ballY >= paddleY && ballY <= paddleY + paddleHeight) {
-    ballSpeedX = -ballSpeedX;
-    ballSpeedX += (ballSpeedX > 0 ? speedIncrement : -speedIncrement);
-    ballSpeedY += (ballSpeedY > 0 ? speedIncrement : -speedIncrement);
-    multiplier += 1;
+  if (ballPosX <= paddleWidth && ballPosY >= paddleLeftY && ballPosY <= paddleLeftY + paddleHeight) {
+    ballVelocityX = -ballVelocityX;
+    ballVelocityX += (ballVelocityX > 0 ? speedIncrease : -speedIncrease);
+    ballVelocityY += (ballVelocityY > 0 ? speedIncrease : -speedIncrease);
+    speedMultiplier += 1;
   }
 
   // Ball collision with right paddle
-  if (ballX >= SCREEN_WIDTH - paddleWidth - 1 && ballY >= paddleY2 && ballY <= paddleY2 + paddleHeight) {
-    ballSpeedX = -ballSpeedX;
-    ballSpeedX += (ballSpeedX > 0 ? speedIncrement : -speedIncrement);
-    ballSpeedY += (ballSpeedY > 0 ? speedIncrement : -speedIncrement);
+  if (ballPosX >= OLED_WIDTH - paddleWidth - 1 && ballPosY >= paddleRightY && ballPosY <= paddleRightY + paddleHeight) {
+    ballVelocityX = -ballVelocityX;
+    ballVelocityX += (ballVelocityX > 0 ? speedIncrease : -speedIncrease);
+    ballVelocityY += (ballVelocityY > 0 ? speedIncrease : -speedIncrease);
     Serial1.println("hit");
-    multiplier += 1;
+    speedMultiplier += 1;
   }
 
-  // Ball goes out of bounds (right side)
-  if (ballX >= SCREEN_WIDTH - 1) {
-    scoreLeft++; // Increment left player's score
+  // Ball out of bounds (right side)
+  if (ballPosX >= OLED_WIDTH - 1) {
+    playerLeftScore++; // Increment left player's score
     playPointSound(); // Play point sound
-    ballX = SCREEN_WIDTH / 2;
-    ballY = SCREEN_HEIGHT / 2;
-    ballSpeedX = 1;
-    ballSpeedY = 1;
+    ballPosX = OLED_WIDTH / 2;
+    ballPosY = OLED_HEIGHT / 2;
+    ballVelocityX = 1;
+    ballVelocityY = 1;
     Serial1.println("out");
-    multiplier = 1;
+    speedMultiplier = 1;
   }
 
-  // Ball goes out of bounds (left side)
-  if (ballX <= 0) {
-    scoreRight++; // Increment right player's score
+  // Ball out of bounds (left side)
+  if (ballPosX <= 0) {
+    playerRightScore++; // Increment right player's score
     playPointSound(); // Play point sound
-    ballX = SCREEN_WIDTH / 2;
-    ballY = SCREEN_HEIGHT / 2;
-    ballSpeedX = -1;
-    ballSpeedY = -1;
-    multiplier = 1;
+    ballPosX = OLED_WIDTH / 2;
+    ballPosY = OLED_HEIGHT / 2;
+    ballVelocityX = -1;
+    ballVelocityY = -1;
+    speedMultiplier = 1;
   }
 
-  // Clear display
-  display.clearDisplay();
+  // Clear the display
+  oledDisplay.clearDisplay();
 
   // Draw left paddle
-  display.fillRect(0, paddleY, paddleWidth, paddleHeight, SSD1306_WHITE);
+  oledDisplay.fillRect(0, paddleLeftY, paddleWidth, paddleHeight, SSD1306_WHITE);
 
   // Draw right paddle
-  display.fillRect(SCREEN_WIDTH - paddleWidth, paddleY2, paddleWidth, paddleHeight, SSD1306_WHITE);
+  oledDisplay.fillRect(OLED_WIDTH - paddleWidth, paddleRightY, paddleWidth, paddleHeight, SSD1306_WHITE);
 
   // Draw ball
-  display.fillRect(ballX, ballY, 2, 2, SSD1306_WHITE);
+  oledDisplay.fillRect(ballPosX, ballPosY, 2, 2, SSD1306_WHITE);
 
-  // Display the scores
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  display.setCursor(30, 0);
-  display.print("P1: ");
-  display.print(scoreLeft);
-  display.setCursor(80, 0);
-  display.print("P2: ");
-  display.print(scoreRight);
+  // Display scores
+  oledDisplay.setTextSize(1);
+  oledDisplay.setTextColor(SSD1306_WHITE);
+  oledDisplay.setCursor(30, 0);
+  oledDisplay.print("P1: ");
+  oledDisplay.print(playerLeftScore);
+  oledDisplay.setCursor(80, 0);
+  oledDisplay.print("P2: ");
+  oledDisplay.print(playerRightScore);
 
-  // Update display
-  display.display();
+  // Update the display
+  oledDisplay.display();
 
-  delay(10); // Delay to control the speed of the game
+  delay(10); // Control game speed
 }
