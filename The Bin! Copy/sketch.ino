@@ -25,7 +25,7 @@ int ballX, ballY;
 int ballSpeedX = 1, ballSpeedY = 1;
 int paddleStep = 1; // Step size for paddle movement
 int bottom = 220;
-int  multiplier = 1;
+int multiplier = 1;
 
 // Scoreboard parameters
 int scoreLeft = 0;
@@ -33,6 +33,22 @@ int scoreRight = 0;
 
 // Speed increment
 float speedIncrement = 0.2;
+
+// Winning score
+const int winningScore = 5;
+
+// Function to display victory message
+void displayVictoryMessage(const char* winner) {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(10, 20);
+  display.print(winner);
+  display.display();
+  while (true) {
+    // Halt the game
+  }
+}
 
 void setup() {
   // Initialize serial communication
@@ -58,6 +74,14 @@ void setup() {
 }
 
 void loop() {
+  // Check for victory
+  if (scoreLeft >= winningScore) {
+    displayVictoryMessage("P1 Wins!");
+  }
+  if (scoreRight >= winningScore) {
+    displayVictoryMessage("P2 Wins!");
+  }
+
   // Read the analog value from the potentiometer
   int potValue = analogRead(potPin); // Read the ADC value
   paddleY = map(potValue, 0, 4095, 0, bottom); // Map to paddle position
@@ -70,7 +94,7 @@ void loop() {
   if (joyYValue > 1020) { // Move up
     paddleY2 -= paddleStep;
     if (paddleY2 < 0) paddleY2 = 0;
-  } 
+  }
   if (joyYValue < 511) { // Move down
     paddleY2 += paddleStep;
     if (paddleY2 > bottom) paddleY2 = bottom;
@@ -78,7 +102,7 @@ void loop() {
 
   // Update ball position
   ballX += ballSpeedX * multiplier;
-  ballY += ballSpeedY *  multiplier;
+  ballY += ballSpeedY * multiplier;
 
   // Ball collision with top and bottom
   if (ballY <= 0 || ballY >= SCREEN_HEIGHT - 1) {
@@ -120,7 +144,7 @@ void loop() {
     ballY = SCREEN_HEIGHT / 2;
     ballSpeedX = -1;
     ballSpeedY = -1;
-    multiplier =1;
+    multiplier = 1;
   }
 
   // Clear display
