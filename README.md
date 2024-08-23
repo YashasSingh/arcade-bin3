@@ -1,4 +1,4 @@
-# Pong Game for Arduino with OLED Display
+# Pong Game for Pico with OLED Display
 
 ## Overview
 
@@ -14,7 +14,7 @@ This project is a classic Pong game implemented on an Arduino board using an SSD
 
 ## Components
 
-- **Arduino Board:** Used to run the game logic.
+- **Pico:** Used to run the game logic.
 - **SSD1306 OLED Display:** 128x64 pixels, used to display the game.
 - **Potentiometer:** Controls the left player's paddle.
 - **Joystick:** Controls the right player's paddle.
