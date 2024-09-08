@@ -1,5 +1,6 @@
 # Pong Game for Pico with OLED Display
-
+![Video Project](https://github.com/user-attachments/assets/46f68442-1010-4dcf-a777-076b4b5c4ecd)
+https://wokwi.com/projects/403683797602635777
 ## Overview
 
 This project is a classic Pong game implemented on an Arduino board using an SSD1306 OLED display. It features two-player gameplay with one player controlling a paddle using a potentiometer and the other using a joystick. The game includes scoring, speed increases after each paddle hit, and sound effects via a buzzer.
